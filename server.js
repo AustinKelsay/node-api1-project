@@ -1,26 +1,14 @@
-const http = require("http")
+const express = require("express")
 
-//request handler
-const server = http.createServer((req, res) => {
-    //request gets info about the incoming request to the server
-    //response is used to send information back to the request address
+//creates our server instance
+const server = express() 
 
-    //there are three things we need to respond with:
+//express comes with routing unlike raw http so we can define how our server will respond based on the endpoint
+//Here we define our route before we deal with any req/res
+server.get("/", (req, res) => {
+    res.json({ message: "hello world" })
+})
 
-    //status code
-    res.statusCode = 200;
-
-    //headers 
-    //"application/json" is confirming that our content type will be json
-    res.setHeader("Content-Type", "application/json")
-
-    //body
-    res.write(JSON.stringify({message: "hello world!"}))
-
-    //now send the response off!
-    res.end()
-});
-
-server.listen(8080, () => {
-    console.log("Server started at port 8080")
+server.listen(6969, () => {
+    console.log("Server started at port 6969")
 })
