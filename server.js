@@ -1,11 +1,13 @@
 const express = require("express")
 const db = require("./database")
+const cors = require("cors")
 
 //creates our server instance
 const server = express() 
 
 // Allows our API to parse request bodies that are JSON into usable objects
 server.use(express.json())
+server.use(cors())
 
 //express comes with routing unlike raw http so we can define how our server will respond based on the endpoint
 //Here we define our route before we deal with any req/res
@@ -15,7 +17,13 @@ server.get("/", (req, res) => {
 
 server.get("/users", (req, res) => {
     const users = db.getUsers()
-    res.json(users)
+    if (users) {
+        res.json(users)
+    } else {
+        res.status(500).json({
+            message: "The users information could not be retrieved."
+        })
+    }
 })
 
 server.get("/users/:id", (req, res) => {
@@ -26,20 +34,21 @@ server.get("/users/:id", (req, res) => {
         res.json(user)
     } else {
         res.status(404).json({
-            message: "user not found",
+            message: "The user with the specified ID does not exist.",
         })
     }
 })
 
 server.post("/users", (req, res) => {
-    if (!req.body.name) {
+    if (!req.body.name && req.body.bio) {
         return res.status(400).json({
-            message: "Need a user name"
+            message: "Please provide name and bio for the user."
         })
     }
     const newUser = db.createUser({
         id: 4,
         name: req.body.name,
+        bio: req.body.bio
     })
     //status 201 is for confirming post success
     res.status(201).json(newUser)
@@ -51,13 +60,14 @@ server.put("/users/:id", (req, res) => {
 
     if(user) {
         const updatedUser = db.updateUser(user.id, {
-            name: req.body.name || user.name
+            name: req.body.name || user.name,
+            bio: req.body.bio || user.bio
         })
 
-        res.json(updatedUser);
+        res.status(200).json(updatedUser);
     } else {
         res.status(404).json({
-            message: "user not found",
+            message: "The user with the specified ID does not exist.",
         })
     }
 })
